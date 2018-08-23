@@ -1,0 +1,12 @@
+package br.com.tbog.jdbcinterfaces;
+
+
+import br.com.tbog.classes.Usuario;
+
+public interface UsuarioDAO {
+	
+	public Usuario buscarPorUsuario(Usuario usuariobd);
+	
+	public boolean inserir(Usuario usuario);
+	
+}

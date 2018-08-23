@@ -1,0 +1,11 @@
+package br.com.tbog.jdbcinterfaces;
+
+import br.com.tbog.classes.RelatorioMensal;
+
+public interface RelatorioDAO {
+
+	public RelatorioMensal buscaRelatorio(String mes, String ano);
+	
+	
+	
+}

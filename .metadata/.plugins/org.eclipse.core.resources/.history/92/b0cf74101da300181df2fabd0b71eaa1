@@ -1,0 +1,105 @@
+ package br.com.tbog.classes;
+
+import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class Usuario implements Serializable{
+
+	/*Variáveis que montam o molde de como o Relatório Mensal é*/
+	private static final long serialVersionUID = 1L;
+	private String id;
+	private String nome;
+	private String nascimento;
+	private String email;
+	private String apelido;
+	private String senha;
+	private String permissao;
+	private String login;
+	private String dataCadastro;
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getNome() {
+		return nome;
+	}
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
+	public String getNascimento() {
+		return nascimento;
+	}
+	public void setNascimento(String nascimento) {
+		this.nascimento = nascimento;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getApelido() {
+		return apelido;
+	}
+	public void setApelido(String apelido) {
+		this.apelido = apelido;
+	}
+	public String getSenha() {
+		return senha;
+	}
+	public void setSenha(String senha) {
+		this.senha = senha;
+	}
+	public String getPermissao() {
+		return permissao;
+	}
+	public void setPermissao(String permissao) {
+		this.permissao = permissao;
+	}
+	
+	public String converteNascimentoParaBD() {
+		String[] nascimentoDividido = nascimento.split("/");
+		String nascimentoConvertido = nascimentoDividido[2] + "-" + nascimentoDividido[1] + "-" + nascimentoDividido[0];
+		return nascimentoConvertido;
+	}
+	
+	public String converteNascimentoParaFrontend(String nascimento) {
+		String[] nascimentoDividido = nascimento.split("-");
+		String nascimentoConvertido = nascimentoDividido[2] + "/" + nascimentoDividido[1] + "/" + nascimentoDividido[0];
+		return nascimentoConvertido;
+	}
+	public String getLogin() {
+		return login;
+	}
+	public void setLogin(String login) {
+		this.login = login;
+	}
+	public String getDataCadastro() {
+		return dataCadastro;
+	}
+	public void setDataCadastro(String dataCadastro) {
+		this.dataCadastro = dataCadastro;
+	}
+	
+	public String converteDatasParaBD(String Data) {
+		String[] DataDividida = Data.split("/");
+		for(int i= 0;i<DataDividida.length;i++) {
+		System.out.println(DataDividida[i]);
+		}
+		String DataConvertida = DataDividida[2] + "-" + DataDividida[1] + "-" + DataDividida[0];
+		return DataConvertida;
+	}
+	
+	public String converteDateParaStringISO(Date Data){
+		System.out.println(Data +" ---- Data aqui LOGIN");
+		   SimpleDateFormat FormataData = new SimpleDateFormat("yyyy-MM-dd");
+		   String date = FormataData.format(Data);
+		   System.out.println(date.toString());
+		   return date.toString(); 
+		}
+	
+}

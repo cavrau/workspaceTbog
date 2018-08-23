@@ -1,0 +1,27 @@
+package br.com.tbog.jdbcinterfaces;
+
+
+import java.util.List;
+
+import br.com.tbog.classes.Pontuacao;
+import br.com.tbog.classes.Usuario;
+
+public interface UsuarioDAO {
+	
+	public Usuario buscarPorUsuario(Usuario usuariobd);
+	
+	public boolean inserir(Usuario usuario);
+	
+	public List<Usuario> buscarUsuarios(String login, String permissao);
+	
+	public List<Pontuacao> consultaRanking(String fase);
+	
+	public boolean inserePontuacao(String fase, String pontuacao, Usuario usuario, String tempo);
+	
+	public boolean atualizarUsuario(Usuario usuarioFrontEnd);
+	
+	public void novaSenha(Usuario usuariobd);
+	
+	public boolean deletaUsuario(Usuario usuario);
+	
+}

@@ -1,0 +1,411 @@
+
+var usuarioLogado;
+$(document).ready(function(){
+	
+	
+	var PATH = '../../';
+	
+	formataDataFrontEnd = function(nascimentoBackEnd){
+		
+		var arrayData = nascimentoBackEnd.split("/");
+		
+		var dataFormatada = arrayData[2] + "-" + arrayData[1] + "-" + arrayData[0];
+		
+		return dataFormatada;
+
+	}
+	excluiUsuario = function(id){
+		var response = confirm("Tem certeza que quer fazer isso?");
+		if(rsponse==true){
+			$.ajax({
+				type:"POST",
+				data: "id="+id,
+				url: PATH + "ExcluiUsuario",
+				success: function(msg){
+					alert(msg.msg);
+					carregaDados();
+				},
+				error: function(info){
+					alert("Erro -" + info);
+				}
+			});
+		}
+	}
+	
+	carregaCadastro = function(usuarios) { 
+		var html="<table id='table_adms''>" +
+		"<thead>" +
+		"<tr>" +
+		"<th>Nome</th>" +
+		"<th>Apelido</th>" +
+		"<th>E-mail</th>" +
+		"<th>Ação</th>" +
+		"<tr>" +
+		"</thead>" +
+		"<tbody>";
+		if(usuarios!=undefined&&usuarios!=null){
+			for(var i=0;Object.keys(usuarios).length>i;i++){
+				html +="<tr>" +
+				"<td id='nome_ADM'>"+usuarios[i].nome+"</td>" +
+				"<td id='apelido_ADM'>"+usuarios[i].apelido+"</td>" +
+				"<td id='email_ADM'>"+usuarios[i].email+"</td>" +
+				"<td>" +
+				"<button class='btn btn-danger' type='button' id='btn_excluir' onclick='excluiUsuario(" + usuarios[i].id+")'>Excluir</button>" +
+				"</td>" +
+				"</tr>";
+			}
+		}else{
+			html+="<tr><td colspan='4'>Nenhum ADM encontrado</td></tr>"
+		}
+		html+="</tbody></table>";
+		$("#table_cadastro").html(html);
+	}
+	
+	carregaControle= function(usuarios){
+		var html="<table>" +
+				"<thead>" +
+				"<tr>" +
+				"<th>Apelido</th>" +
+				"<th>Nome</th>" +
+				"<th>E-mail</th>" +
+				"<th>Data de Nascimento</th>" +
+				"<th>Ação</th>" +
+				"<tr>" +
+				"</thead>" +
+				"<tbody>";
+		if(usuarios!=undefined&&usuarios!=null){
+			for(var i=0;Object.keys(usuarios).length>i;i++){
+				html +="<tr>" +
+					"<td id='td_BanNick'>"+usuarios[i].apelido+"</td>" +
+					"<td>"+usuarios[i].nome+"</td>" +
+					"<td>"+usuarios[i].email+"</td>" +
+					"<td>"+usuarios[i].nascimento+"</td>" +
+					"<td>" +
+						"<button class='btn btn-danger' type='button' id='btn_excluir' onclick='excluiUsuario("+usuarios[i].id+")'>Excluir</button>" +
+					"</td>" +
+					"</tr>";
+			}
+		}else{
+			html+="<tr><td colspan='5'>Nenhum usuário encontrado</td></tr>"
+		}
+		html+="</tbody></table>";
+	$("#div_jogador").html(html);
+	}
+		consultaUsuario = function(pagename,permissao,login){
+		if((login==""||login==undefined)){
+			login=null;
+		}
+		if(pagename=="cadastro")
+			login=""
+		if(login!=null){
+			$.ajax({
+				type: "POST",
+				url: PATH+"ConsultaPorLogin",
+				data: 'permissao='+permissao+'&&login='+login,
+				success: function(usuarios){
+					switch(pagename){
+					case "controle":
+						carregaControle(usuarios);
+						break;
+					case "cadastro":
+						carregaCadastro(usuarios);
+						break;
+					}
+				}
+			})
+		}else{
+			carregaControle(null);
+		}
+		
+		var cadastros = new Array(),
+		ativos = new Array(),
+		
+		ConstChart = function(){
+			$.ajax({
+				type: 'POST',
+				url: PATH + "ConstroiCharts",
+				success: function(listaDeRelatorios){
+					arrumaDadosChart(listaDeRelatorios);
+					
+					console.log(listaDeRelatorios);
+					
+					drawCharts(cadastros, ativos);
+				},
+				error: function(info){
+					alert("Error " + info);
+				}
+			});
+		}
+		
+		
+		arrumaDadosChart = function(listaDeRelatorios){
+			
+				for(var i = 0 ; i < Object.keys(listaDeRelatorios).length; i++){
+					
+					if(parseInt(listaDeRelatorios[i].mes)){
+						cadastros.push(listaDeRelatorios[i].numeroCadastros);
+					}
+					
+					if(parseInt(listaDeRelatorios[i].mes)){
+						ativos.push(listaDeRelatorios[i].numeroVisitas);
+					}
+					
+				}
+				
+				console.log(cadastros + " - Cadastros");
+				console.log(ativos + " - Ativos");
+			
+			}
+			
+		
+		drawCharts = function(cadastros, ativos){
+			
+				var ctx = $('#canvas_ativos');
+				
+				new Chart(ctx, {
+			        type: 'bar',
+			        data: {
+			            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Maio', 'Jun', 'Jul', 'Ago', 'Set',
+			            	'Out', 'Nov', 'Dez'],
+			            datasets: [{
+			            	label: 'Acessos Mensais',
+			                backgroundColor: 'rgb(0, 0, 0)',
+			                borderColor: 'rgb(255, 255, 255)',
+			                data: cadastros,
+			            }]
+			        },
+			        options: {
+			        	title:{
+			        		display: true,
+			        		fontsize: '20',
+			        		text: 'Relatório de acessos mensais'
+			        	}
+			        }
+			    });
+				
+				var ctx = $('#canvas_cadastrados');
+				
+				new Chart(ctx, {
+			        type: 'bar',
+			        data: {
+			            labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Maio', 'Jun', 'Jul', 'Ago', 'Set',
+			            	'Out', 'Nov', 'Dez'],
+			            datasets: [{
+			            	label: 'Cadastros Mensais',
+			                backgroundColor: 'rgb(0, 0, 255)',
+			                borderColor: 'rgb(255, 255, 255)',
+			                data: ativos,
+			            }]
+			        },
+			        options: {
+			        	title:{
+			        		display: true,
+			        		fontsize: '20',
+			        		text: 'Relatório de cadastros mensais'
+			        	}
+			        }
+			    });
+				
+			}
+
+		}
+		carregaDados= function(pagename){
+			switch(pagename){
+			case "controle":
+				var login=$("#input_consultar").val();
+				consultaUsuario(pagename,0,login);
+				break;
+			case "cadastro":
+				consultaUsuario(pagename,1,"");
+				break;
+			case "main":
+				ConstChart();
+				break;
+			case "perfil":
+				$("#nomeLogado").val(usuarioLogado.nome);
+				$("#emailLogado").val(usuarioLogado.email);
+				$("input[type='date']").val(usuarioLogado.nascimento);
+				$("#nicknameLogado").val(usuarioLogado.apelido);
+				
+				/*Modal de Editar perfil*/
+				$("#nomeUpdate").val(usuarioLogado.nome);
+				$("#emailUpdate").val(usuarioLogado.email);
+				$("#nascimentoUpdate").val(usuarioLogado.nascimento);
+				$("#nicknameUpdate").val(usuarioLogado.apelido);
+				$("#senha").val("");
+				$("#novaSenha").val("");
+				$("#confirmaSenha").val("");
+				
+				console.log("============= - 2");
+				console.log(usuarioLogado);
+				console.log("============= - 2");
+				break;	
+			}
+	}
+		editaUsuario = function(){
+			$.ajax({
+				type: "POST",
+				url: PATH + "EditaUsuario",
+				data: $("#perfilForm").serialize()+"&txt_id="+usuarioLogado.id+"&txt_nickAntigo="+usuarioLogado.apelido,
+				success: function (msg) {
+					console.log(msg.msg + "   ssenijsdhbvbibsbdvubsduvh");
+					$("#atualizaInfo").modal("hide");
+					
+						if(!msg.erro){
+							validaUsuario();
+							carregaDados("perfil");
+							$("#msg").html(msg.msg);
+							openModal(msg);
+						}else if(msg.erro){
+							carregaDados("perfil");
+							$("#msg").html(msg.msg);
+							openModal(msg);
+						}
+					
+				},
+				error: function (info) {
+					$("#msg").html("Erro ao alterar seus dados: "+ info.status + " - " + info.statusText);
+					openModal(msg);
+				}
+			});
+		}
+	carregaPagina= function(){
+		var pagename = window.location.search.substring(1);  
+		if (pagename==''){
+			pagename='main';
+		}  
+		$('#content').load(pagename+'.html',
+		function(response, status, info) {
+			if (status == "error") {
+				var msg = "Houve um erro ao encontrar a página: "+ info.status + " - " + info.statusText;
+				$("#content").html(msg);
+            }else{
+            	carregaDados(pagename)
+            	
+            }
+        })
+    }
+	/*Função que valida a autenticidade do login do usuário*/
+	validaUsuario = function(){
+		$.ajax({
+			type: "POST",
+			url: PATH + "ValidaSessao",
+			data: "p=1",
+			success: function (usuario) {
+				if (usuario.apelido!=null){
+					var usuario1 = new Object();
+					usuario1.nome = usuario.nome;
+					usuario1.apelido = usuario.apelido;
+					usuario1.email = usuario.email;
+					usuario1.nascimento = usuario.nascimento;
+					usuario1.nascimento = formataDataFrontEnd(usuario1.nascimento);
+					usuario1.id = usuario.id;
+					usuarioLogado= usuario1;
+					console.log("============= - 1");
+					console.log(usuarioLogado);
+					console.log("============= - 1");
+					carregaPagina();
+				} else {
+					alert(usuario.permissao);
+					sair();
+				}	
+			},
+			error: function (info) {
+				sair();
+			}
+		});
+	}
+	//Chama a função assim que a página for carregada
+	validaUsuario();
+	sair = function(){
+		$.ajax({
+			type: "POST",
+			url: PATH + "Logout",
+			success: function (data) {
+				window.location.href = (PATH+"index.html");	
+			},
+			error: function (info) {
+				alert("Erro ao tentar encerrar sua sessão: "+ info.status + " - " + info.statusText);	
+			}
+		});
+	}
+	
+	});
+/*Função que faz a validação do cadastro*/
+validaCadastro= function(){
+    if(validaCampo('#nome')&&validaCampo('#nickname')&&validaCampo('#nascimento')&&validaCampo('#senha')&&validaCampo('#email')&&validaCampo('#confirmaSenha')&&validaCampo('#confirmaEmail')){
+
+        if (($('#email').val()==$('#confirmaEmail').val())){
+
+            if ($('#confirmaSenha').val()==$('#senha').val()){
+                return true;
+            }else{
+                alert("Os campos de senha não tem o mesmo valor");
+                $('#confirmaSenha').focus();
+                return false;
+            }
+        }else{
+            alert("Os campos de e-mail não tem o mesmo valor");
+            $('#confirmaEmail').focus();
+            return false;
+        }
+    }else
+        return false;
+}
+/*Função que faz a validação dos campos vazios*/
+validaCampo = function(nome){
+    if($(nome).val()==""){
+        $(nome).focus();
+        return false;
+    }else{
+        return true;
+    }
+}
+/*Função que faz a atualização dos dados do jogador */
+validaPerfil = function() {
+	console.log("============= - 3");
+	console.log(usuarioLogado);
+	console.log("============= - 3");
+    //linha abaixo valida se todos os campos menos os de nova senha e confirmação preeenchidos
+    if(validaCampo('#nicknameUpdate')&&validaCampo('#nomeUpdate')&&validaCampo('#emailUpdate')&&validaCampo('#nascimentoUpdate')){
+    	console.log("estou aqui - 1");
+            if(validaCampo('#senha')){
+            	console.log("estou aqui - 2");
+//             linha abaixo valida se os campos de nova senha estão preenchidos
+                if(validaCampo('#novaSenha')&&validaCampo('#confirmaSenha')){
+                	console.log("estou aqui - 4");
+                    if($("#senha").val() == $("#novaSenha").val()){
+                    	alert("Nova senha tem o mesmo valor da senha anterior!");
+//                    	$("#msg").html("Nova senha tem o mesmo valor da senha anterior!");
+//                    	$("#msgModal").modal();
+                    	return false;
+                    }else if($('#novaSenha').val() == $('#confirmaSenha').val()){
+                        editaUsuario();
+                    }else{
+                    	alert("Os campos de nova senha não tem os mesmo valor");
+//                    	$("#msg").html("Os campos de nova senha não tem os mesmo valor");
+//                    	$("#msgModal").modal();
+                        $('#novaSenha').focus();
+                        return false;
+                    }
+                }
+                console.log("estou aqui - 3");
+                editaUsuario();    
+        }else{
+            $('#senha').focus();
+            return false;
+        }
+    }else{
+        return false;
+    }
+}
+
+/*Função que mostra o nome do jogador a ser banido ao 
+admin que vai bani-lo o jogo */
+var nickBan = "";
+$(document).ready(function(){
+    $("#btn_excluir").click(function(){
+        nickBan = $("#td_BanNick").text();
+        $("#div_banidoPor").html("<h6 id='h6_jogadorBanido'>Deseja excluír o jogador " + nickBan + " por:</h6>");
+    });
+});

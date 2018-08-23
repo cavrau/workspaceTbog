@@ -1,0 +1,7 @@
+INDEX VERSION 1.4+C:\Users\arina\Desktop\workspaceTbog\.metadata\.plugins\org.eclipse.wst.jsdt.core\indexes
+2185920614.index
+1209697618.index
+1667096682.index
+2665003347.index
+953682797.index
+1333898007.index
